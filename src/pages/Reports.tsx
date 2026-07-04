@@ -5,7 +5,7 @@ import {
   formatDateTime, formatRelativeTime,
   severityColors, statusColors, reportTypeLabel, severityDot
 } from '../lib/utils';
-import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 
 interface Props {
   reports: Report[];
@@ -41,7 +41,7 @@ export default function Reports({ reports, onUpdate }: Props) {
 
   async function updateStatus(id: string, status: ReportStatus) {
     setUpdatingId(id);
-    await supabase.from('reports').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+await api.liveReports.update(id, { status });
     setUpdatingId(null);
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null);
     onUpdate();

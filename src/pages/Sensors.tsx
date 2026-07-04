@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Plus, X, Thermometer, Camera, Activity, Wind, Flame, Radio, AlertTriangle, Wifi, WifiOff, Battery, Clock } from 'lucide-react';
 import type { Sensor, Zone, SensorType, SensorStatus } from '../lib/types';
 import { sensorStatusBadge, sensorTypeLabel, formatRelativeTime, formatDateTime } from '../lib/utils';
-import { supabase } from '../lib/supabase';
+// Tumeagiza api hapa kama ulivyotaka
+import { api } from '../lib/api'; 
 
 interface Props {
   sensors: Sensor[];
@@ -11,7 +12,6 @@ interface Props {
 }
 
 const SENSOR_TYPES: SensorType[] = ['motion', 'thermal', 'camera', 'vibration', 'gas', 'smoke'];
-// Removed 'maintenance' status from core statuses list
 const SENSOR_STATUSES: SensorStatus[] = ['online', 'offline', 'alert'];
 
 const typeIcon = (type: SensorType) => {
@@ -38,35 +38,48 @@ const statusIcon = (status: SensorStatus) => {
 export default function Sensors({ sensors, zones, onUpdate }: Props) {
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState<Sensor | null>(null);
-  // Removed x_percent and y_percent from the default add form
   const [form, setForm] = useState({ name: '', zone_id: '', type: 'motion' as SensorType });
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<SensorStatus | ''>('');
 
   const filtered = filter ? sensors.filter(s => s.status === filter) : sensors;
 
+  // Imerekebishwa kutumia 'api.sensors.add' au mfumo unaofanana nao
   async function addSensor() {
     if (!form.name.trim()) return;
     setSaving(true);
-    await supabase.from('sensors').insert({
-      name: form.name,
-      zone_id: form.zone_id || null,
-      type: form.type,
-      status: 'online',
-      battery_level: 100,
-      last_ping: new Date().toISOString(),
-      metadata: {},
-    });
-    setSaving(false);
-    setShowAdd(false);
-    setForm({ name: '', zone_id: '', type: 'motion' });
-    onUpdate();
+    try {
+      // Hapa tunatumia api tuliyoagiza badala ya Supabase ya moja kwa moja
+      await api.sensors.create({
+        name: form.name,
+        zone_id: form.zone_id || null,
+        type: form.type,
+        status: 'online',
+        battery_level: 100,
+        last_ping: new Date().toISOString(),
+        metadata: {},
+      });
+      
+      setShowAdd(false);
+      setForm({ name: '', zone_id: '', type: 'motion' });
+      onUpdate();
+    } catch (error) {
+      console.error("Ushindani wa kuongeza sensor:", error);
+    } finally {
+      setSaving(false);
+    }
   }
 
+  // Imerekebishwa kutumia 'api.sensors.update'
   async function updateStatus(id: string, status: SensorStatus) {
-    await supabase.from('sensors').update({ status }).eq('id', id);
-    if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null);
-    onUpdate();
+    try {
+      // Hapa tunatumia api kusasisha hali (status) ya sensor
+      await api.sensors.update(id, { status });
+      if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null);
+      onUpdate();
+    } catch (error) {
+      console.error("Ushindani wa kusasisha hali:", error);
+    }
   }
 
   const countByStatus = (s: SensorStatus) => sensors.filter(x => x.status === s).length;
@@ -78,7 +91,6 @@ export default function Sensors({ sensors, zones, onUpdate }: Props) {
         <div className="px-6 py-4 border-b border-slate-200 bg-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex gap-2">
-              {/* Removed 'maintenance' from header filter tabs */}
               {(['', 'online', 'alert', 'offline'] as const).map(s => (
                 <button
                   key={s}
@@ -259,7 +271,6 @@ export default function Sensors({ sensors, zones, onUpdate }: Props) {
                   {zones.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
                 </select>
               </Field>
-              {/* Geometric X and Y position fields have been entirely removed here */}
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 text-sm border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>

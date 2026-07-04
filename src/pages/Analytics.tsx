@@ -1,9 +1,10 @@
-import type { Report } from '../lib/types';
+import type { Report, Sensor } from '../lib/types';
 import { reportTypeLabel } from '../lib/utils';
 import type { ReportType } from '../lib/types';
 
 interface Props {
   reports: Report[];
+  sensors: Sensor[];
 }
 
 function BarChart({ data, maxVal, color }: { data: { label: string; value: number }[]; maxVal: number; color: string }) {

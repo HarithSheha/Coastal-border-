@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Plus, X, Shield, AlertTriangle } from 'lucide-react';
 import type { Zone, ZoneType, ZoneStatus } from '../lib/types';
 import { zoneStatusBadge, zoneTypeLabel, formatDateTime } from '../lib/utils';
-import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 
 interface Props {
   zones: Zone[];
@@ -35,7 +35,7 @@ export default function Zones({ zones, onUpdate }: Props) {
   async function addZone() {
     if (!form.name.trim()) return;
     setSaving(true);
-    await supabase.from('zones').insert(form);
+    await api.zones.create(form);
     setSaving(false);
     setShowAdd(false);
     setForm(defaultForm);
@@ -43,7 +43,7 @@ export default function Zones({ zones, onUpdate }: Props) {
   }
 
   async function updateZoneStatus(id: string, status: ZoneStatus) {
-    await supabase.from('zones').update({ status }).eq('id', id);
+    await api.zones.update(id, { status });
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null);
     onUpdate();
   }

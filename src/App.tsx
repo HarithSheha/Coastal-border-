@@ -7,7 +7,7 @@ import LiveMap from './pages/LiveMap';
 import Analytics from './pages/Analytics';
 import Sensors from './pages/Sensors';
 import Zones from './pages/Zones';
-import { supabase } from './lib/supabase';
+import { api } from './lib/api';
 import type { Report, Sensor, Zone } from './lib/types';
 
 export default function App() {
@@ -19,28 +19,20 @@ export default function App() {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    const [reportRes, sensorRes, zoneRes] = await Promise.all([
-      supabase
-        .from('reports')
-        .select('*, zones(*), sensors(*)')
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('sensors')
-        .select('*, zones(*)')
-        .order('created_at', { ascending: true }),
-      supabase
-        .from('zones')
-        .select('*')
-        .order('created_at', { ascending: true }),
-    ]);
-    if (reportRes.data) setReports(reportRes.data as Report[]);
-    if (sensorRes.data) setSensors(sensorRes.data as Sensor[]);
-    if (zoneRes.data) setZones(zoneRes.data as Zone[]);
-    setLoading(false);
-    if (isRefresh) setRefreshing(false);
-  }, []);
-
+  if (isRefresh) setRefreshing(true);
+  // NOTE: the dashboard's incident-alert feed is now api.liveReports (was api.reports)
+  // api.reports is now the new zone/urgency sighting-reports endpoint — wire it up separately.
+  const [reportData, sensorData, zoneData] = await Promise.all([
+    api.liveReports.list(),
+    api.sensors.list(),
+    api.zones.list(),
+  ]);
+  if (reportData) setReports(reportData);
+  if (sensorData) setSensors(sensorData);
+  if (zoneData)   setZones(zoneData);
+  setLoading(false);
+  if (isRefresh) setRefreshing(false);
+}, []);
   useEffect(() => {
     fetchData();
     const interval = setInterval(() => fetchData(true), 30000);
