@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Radio, Shield, AlertTriangle, Wifi, WifiOff, Thermometer, Camera, Activity, Wind, Flame, Clock, Inbox } from 'lucide-react';
 import type { Report, Sensor, Zone } from '../lib/types';
 import { formatRelativeTime, sensorStatusBadge, zoneStatusBadge, severityColors } from '../lib/utils';
+import { usePagination } from '../lib/usePagination';
+import Pagination from '../components/Pagination';
 
 interface Props {
   zones: Zone[];
@@ -25,6 +27,11 @@ export default function LiveMap({ zones, sensors, reports }: Props) {
   );
 
   const activeAlerts = sensors.filter(s => s.status === 'alert');
+
+  const reportsLog = usePagination(allReports, 10); // 5 rows x 2 cols
+  const alertsList = usePagination(activeAlerts, 3);
+  const zoneStatusList = usePagination(zones, 5);
+  const hardwareStatusList = usePagination(sensors, 5);
 
   return (
     <div className="flex h-full gap-0 bg-slate-50">
@@ -50,7 +57,7 @@ export default function LiveMap({ zones, sensors, reports }: Props) {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {allReports.map(r => {
+              {reportsLog.pageItems.map(r => {
                 const isSelected = selectedReport?.id === r.id;
                 return (
                   <div
@@ -97,6 +104,7 @@ export default function LiveMap({ zones, sensors, reports }: Props) {
               })}
             </div>
           )}
+          <Pagination page={reportsLog.page} totalPages={reportsLog.totalPages} onChange={reportsLog.setPage} />
         </div>
       </div>
 
@@ -108,17 +116,20 @@ export default function LiveMap({ zones, sensors, reports }: Props) {
           {activeAlerts.length === 0 ? (
             <p className="text-xs text-slate-400">All equipment scanning clear</p>
           ) : (
-            <div className="space-y-2">
-              {activeAlerts.map(s => (
-                <div key={s.id} className="flex items-center gap-2 p-2.5 bg-red-50 rounded-lg border border-red-100">
-                  <AlertTriangle size={13} className="text-red-600 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-red-800 truncate">{s.name}</p>
-                    <p className="text-xs text-red-500 capitalize">{s.type}</p>
+            <>
+              <div className="space-y-2">
+                {alertsList.pageItems.map(s => (
+                  <div key={s.id} className="flex items-center gap-2 p-2.5 bg-red-50 rounded-lg border border-red-100">
+                    <AlertTriangle size={13} className="text-red-600 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-red-800 truncate">{s.name}</p>
+                      <p className="text-xs text-red-500 capitalize">{s.type}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <Pagination page={alertsList.page} totalPages={alertsList.totalPages} onChange={alertsList.setPage} />
+            </>
           )}
         </div>
 
@@ -126,7 +137,7 @@ export default function LiveMap({ zones, sensors, reports }: Props) {
         <div className="p-4 border-b border-slate-200">
           <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Zone Status</h3>
           <div className="space-y-2">
-            {zones.map(z => (
+            {zoneStatusList.pageItems.map(z => (
               <div key={z.id} className="flex items-center gap-2 p-2.5 rounded-lg hover:bg-slate-50 transition-colors">
                 <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: z.color || '#cbd5e1' }} />
                 <span className="text-xs text-slate-700 flex-1 truncate">{z.name}</span>
@@ -134,13 +145,14 @@ export default function LiveMap({ zones, sensors, reports }: Props) {
               </div>
             ))}
           </div>
+          <Pagination page={zoneStatusList.page} totalPages={zoneStatusList.totalPages} onChange={zoneStatusList.setPage} />
         </div>
 
         {/* Sensor statuses */}
         <div className="p-4">
           <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Hardware Status</h3>
           <div className="space-y-2">
-            {sensors.map(s => (
+            {hardwareStatusList.pageItems.map(s => (
               <div key={s.id} className="flex items-center gap-2 p-1.5 rounded-md hover:bg-slate-50">
                 {sensorStatusIcon(s.status)}
                 <span className="text-xs text-slate-600 flex-1 truncate">{s.name}</span>
@@ -148,6 +160,7 @@ export default function LiveMap({ zones, sensors, reports }: Props) {
               </div>
             ))}
           </div>
+          <Pagination page={hardwareStatusList.page} totalPages={hardwareStatusList.totalPages} onChange={hardwareStatusList.setPage} />
         </div>
       </div>
 

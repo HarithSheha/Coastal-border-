@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Filter, X, MapPin, User, Clock, Image, ChevronDown, Eye } from 'lucide-react';
-import type { Report, ReportSeverity, ReportStatus, ReportType } from '../lib/types';
+import type { Report, ReportSeverity, ReportSource, ReportStatus, ReportType } from '../lib/types';
 import {
   formatDateTime, formatRelativeTime,
   severityColors, statusColors, reportTypeLabel, severityDot
 } from '../lib/utils';
 import { api } from '../lib/api';
+import { usePagination } from '../lib/usePagination';
+import Pagination from '../components/Pagination';
 
 interface Props {
   reports: Report[];
@@ -21,6 +23,19 @@ const SAMPLE_IMAGES = [
   'https://images.pexels.com/photos/1108701/pexels-photo-1108701.jpeg?w=800',
   'https://images.pexels.com/photos/2399840/pexels-photo-2399840.jpeg?w=800',
 ];
+
+const severityBorder: Record<ReportSeverity, string> = {
+  low: 'border-l-slate-400',
+  medium: 'border-l-amber-500',
+  high: 'border-l-orange-500',
+  critical: 'border-l-red-600',
+};
+
+const sourceColor: Record<ReportSource, string> = {
+  sensor: 'text-blue-600',
+  mobile: 'text-emerald-600',
+  manual: 'text-slate-500',
+};
 
 export default function Reports({ reports, onUpdate }: Props) {
   const [search, setSearch] = useState('');
@@ -38,6 +53,12 @@ export default function Reports({ reports, onUpdate }: Props) {
     if (typeFilter && r.type !== typeFilter) return false;
     return true;
   });
+
+  const { page, setPage, totalPages, pageItems } = usePagination(filtered, 5);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, severityFilter, statusFilter, typeFilter, setPage]);
 
   async function updateStatus(id: string, status: ReportStatus) {
     setUpdatingId(id);
@@ -89,66 +110,80 @@ await api.liveReports.update(id, { status });
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-auto">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Incident</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Type</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Severity</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Source</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Time</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
-              {filtered.map(r => (
-                <tr
-                  key={r.id}
-                  className={`hover:bg-slate-50 cursor-pointer transition-colors ${selected?.id === r.id ? 'bg-blue-50' : ''}`}
-                  onClick={() => setSelected(r)}
-                >
-                  <td className="px-6 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full shrink-0 ${severityDot[r.severity]}`} />
-                      <div>
-                        <p className="font-medium text-slate-800 leading-tight">{r.title}</p>
-                        <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                          <User size={10} /> {r.reporter_name}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5 text-xs text-slate-600">{reportTypeLabel[r.type]}</td>
-                  <td className="px-4 py-3.5">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${severityColors[r.severity]}`}>
-                      {r.severity}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[r.status]}`}>
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className={`text-xs font-medium capitalize ${r.source === 'sensor' ? 'text-blue-600' : r.source === 'mobile' ? 'text-emerald-600' : 'text-slate-500'}`}>
-                      {r.source}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5 text-xs text-slate-400 whitespace-nowrap">{formatRelativeTime(r.created_at)}</td>
-                  <td className="px-4 py-3.5">
-                    <Eye size={14} className="text-slate-300 hover:text-blue-500 transition-colors" />
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
+        <div className="flex-1 overflow-auto p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm shadow-slate-200/60 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-900">
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-slate-400 text-sm">No reports match your filters</td>
+                  <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Incident</th>
+                  <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Type</th>
+                  <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Severity</th>
+                  <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Source</th>
+                  <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Time</th>
+                  <th className="px-4 py-3.5 w-12" />
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {pageItems.map((r, i) => (
+                  <tr
+                    key={r.id}
+                    className={`group cursor-pointer transition-colors border-l-4 ${severityBorder[r.severity]} ${
+                      selected?.id === r.id
+                        ? 'bg-blue-50/70'
+                        : i % 2 === 0
+                        ? 'bg-white hover:bg-slate-50'
+                        : 'bg-slate-50/60 hover:bg-slate-100/70'
+                    }`}
+                    onClick={() => setSelected(r)}
+                  >
+                    <td className="pl-5 pr-4 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold flex items-center justify-center shrink-0 uppercase">
+                          {r.reporter_name.slice(0, 2)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-800 leading-tight truncate">{r.title}</p>
+                          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                            <User size={10} /> {r.reporter_name}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-slate-600 font-medium">{reportTypeLabel[r.type]}</td>
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-semibold ${severityColors[r.severity]}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${severityDot[r.severity]}`} />
+                        {r.severity}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${statusColors[r.status]}`}>
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className={`text-xs font-semibold capitalize ${sourceColor[r.source]}`}>
+                        {r.source}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-slate-400 font-mono whitespace-nowrap">{formatRelativeTime(r.created_at)}</td>
+                    <td className="px-4 py-3.5 text-right pr-5">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-full text-slate-300 group-hover:text-blue-500 group-hover:bg-blue-50 transition-colors">
+                        <Eye size={14} />
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="py-16 text-center text-slate-400 text-sm">No reports match your filters</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+          </div>
         </div>
       </div>
 

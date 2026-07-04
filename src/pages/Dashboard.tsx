@@ -1,6 +1,8 @@
 import { AlertTriangle, FileText, Radio, Shield, TrendingUp, Clock, ChevronRight } from 'lucide-react';
 import type { Report, Sensor, Zone } from '../lib/types';
 import { formatRelativeTime, severityColors, statusColors, severityDot } from '../lib/utils';
+import { usePagination } from '../lib/usePagination';
+import Pagination from '../components/Pagination';
 
 interface Props {
   reports: Report[];
@@ -15,7 +17,11 @@ export default function Dashboard({ reports, sensors, zones, onNavigate }: Props
   const alertSensors = sensors.filter(s => s.status === 'alert').length;
   const offlineSensors = sensors.filter(s => s.status === 'offline').length;
   const breachZones = zones.filter(z => z.status === 'breach').length;
-  const recentReports = [...reports].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 6);
+  const sortedReports = [...reports].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const recentIncidents = usePagination(sortedReports, 5);
+  const zoneStatusList = usePagination(zones, 5);
+  const sensorOverview = usePagination(sensors, 8); // 2 rows x 4 cols
 
   const stats = [
     {
@@ -108,7 +114,7 @@ export default function Dashboard({ reports, sensors, zones, onNavigate }: Props
             </button>
           </div>
           <div className="divide-y divide-slate-50">
-            {recentReports.map(r => (
+            {recentIncidents.pageItems.map(r => (
               <div key={r.id} className="px-5 py-3.5 flex items-start gap-3 hover:bg-slate-50 transition-colors">
                 <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${severityDot[r.severity]}`} />
                 <div className="flex-1 min-w-0">
@@ -130,6 +136,7 @@ export default function Dashboard({ reports, sensors, zones, onNavigate }: Props
               </div>
             ))}
           </div>
+          <Pagination page={recentIncidents.page} totalPages={recentIncidents.totalPages} onChange={recentIncidents.setPage} />
         </div>
 
         {/* Zone status */}
@@ -147,7 +154,7 @@ export default function Dashboard({ reports, sensors, zones, onNavigate }: Props
             </button>
           </div>
           <div className="p-4 space-y-2.5">
-            {zones.map(z => (
+            {zoneStatusList.pageItems.map(z => (
               <div key={z.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50">
                 <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: z.color }} />
                 <div className="flex-1 min-w-0">
@@ -160,6 +167,7 @@ export default function Dashboard({ reports, sensors, zones, onNavigate }: Props
               </div>
             ))}
           </div>
+          <Pagination page={zoneStatusList.page} totalPages={zoneStatusList.totalPages} onChange={zoneStatusList.setPage} />
         </div>
       </div>
 
@@ -178,7 +186,7 @@ export default function Dashboard({ reports, sensors, zones, onNavigate }: Props
           </button>
         </div>
         <div className="p-4 grid grid-cols-4 gap-3">
-          {sensors.map(s => (
+          {sensorOverview.pageItems.map(s => (
             <div
               key={s.id}
               className={`p-3 rounded-lg border ${s.status === 'alert' ? 'border-red-200 bg-red-50' : s.status === 'offline' ? 'border-slate-200 bg-slate-50' : 'border-slate-100 bg-white'}`}
@@ -192,6 +200,7 @@ export default function Dashboard({ reports, sensors, zones, onNavigate }: Props
             </div>
           ))}
         </div>
+        <Pagination page={sensorOverview.page} totalPages={sensorOverview.totalPages} onChange={sensorOverview.setPage} />
       </div>
     </div>
   );

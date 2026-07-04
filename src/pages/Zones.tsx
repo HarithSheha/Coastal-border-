@@ -3,6 +3,8 @@ import { Plus, X, Shield, AlertTriangle } from 'lucide-react';
 import type { Zone, ZoneType, ZoneStatus } from '../lib/types';
 import { zoneStatusBadge, zoneTypeLabel, formatDateTime } from '../lib/utils';
 import { api } from '../lib/api';
+import { usePagination } from '../lib/usePagination';
+import Pagination from '../components/Pagination';
 
 interface Props {
   zones: Zone[];
@@ -31,6 +33,7 @@ export default function Zones({ zones, onUpdate }: Props) {
   const [selected, setSelected] = useState<Zone | null>(null);
   const [form, setForm] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
+  const { page, setPage, totalPages, pageItems } = usePagination(zones, 6); // 3 rows x 2 cols
 
   async function addZone() {
     if (!form.name.trim()) return;
@@ -73,7 +76,7 @@ export default function Zones({ zones, onUpdate }: Props) {
         {/* Zone cards */}
         <div className="flex-1 overflow-auto p-6">
           <div className="grid grid-cols-2 gap-4">
-            {zones.map(z => (
+            {pageItems.map(z => (
               <button
                 key={z.id}
                 onClick={() => setSelected(selected?.id === z.id ? null : z)}
@@ -98,6 +101,7 @@ export default function Zones({ zones, onUpdate }: Props) {
               </button>
             ))}
           </div>
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       </div>
 

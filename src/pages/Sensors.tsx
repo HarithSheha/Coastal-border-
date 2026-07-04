@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, X, Thermometer, Camera, Activity, Wind, Flame, Radio, AlertTriangle, Wifi, WifiOff, Battery, Clock } from 'lucide-react';
 import type { Sensor, Zone, SensorType, SensorStatus } from '../lib/types';
 import { sensorStatusBadge, sensorTypeLabel, formatRelativeTime, formatDateTime } from '../lib/utils';
 // Tumeagiza api hapa kama ulivyotaka
-import { api } from '../lib/api'; 
+import { api } from '../lib/api';
+import { usePagination } from '../lib/usePagination';
+import Pagination from '../components/Pagination';
 
 interface Props {
   sensors: Sensor[];
@@ -43,6 +45,11 @@ export default function Sensors({ sensors, zones, onUpdate }: Props) {
   const [filter, setFilter] = useState<SensorStatus | ''>('');
 
   const filtered = filter ? sensors.filter(s => s.status === filter) : sensors;
+  const { page, setPage, totalPages, pageItems } = usePagination(filtered, 6); // 2 rows x 3 cols
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter, setPage]);
 
   // Imerekebishwa kutumia 'api.sensors.add' au mfumo unaofanana nao
   async function addSensor() {
@@ -113,7 +120,7 @@ export default function Sensors({ sensors, zones, onUpdate }: Props) {
         {/* Grid */}
         <div className="flex-1 overflow-auto p-6">
           <div className="grid grid-cols-3 gap-4">
-            {filtered.map(s => (
+            {pageItems.map(s => (
               <button
                 key={s.id}
                 onClick={() => setSelected(selected?.id === s.id ? null : s)}
@@ -170,6 +177,7 @@ export default function Sensors({ sensors, zones, onUpdate }: Props) {
               <div className="col-span-3 text-center py-20 text-slate-400 text-sm">No sensors found</div>
             )}
           </div>
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       </div>
 
