@@ -1,4 +1,4 @@
-import { AlertTriangle, FileText, Radio, Shield, TrendingUp, Clock, ChevronRight } from 'lucide-react';
+import { FileText, Radio, Shield, TrendingUp, Clock, ChevronRight } from 'lucide-react';
 import type { Report, Sensor, Zone } from '../lib/types';
 import { formatRelativeTime, severityColors, statusColors, severityDot } from '../lib/utils';
 import { usePagination } from '../lib/usePagination';
@@ -64,23 +64,7 @@ export default function Dashboard({ reports, sensors, zones, onNavigate }: Props
 
   return (
     <div className="p-6 space-y-6">
-      {/* Alert banner for critical */}
-      {criticalReports > 0 && (
-        <div className="bg-red-600 text-white rounded-xl px-5 py-3.5 flex items-center gap-3">
-          <AlertTriangle size={18} className="shrink-0" />
-          <span className="text-sm font-medium">
-            {criticalReports} critical incident{criticalReports > 1 ? 's' : ''} require immediate attention
-          </span>
-          <button
-            onClick={() => onNavigate('reports')}
-            className="ml-auto text-xs bg-white/20 hover:bg-white/30 transition-colors px-3 py-1.5 rounded-lg font-medium"
-          >
-            View All
-          </button>
-        </div>
-      )}
-
-      {/* Stats */}
+{/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {stats.map(s => (
           <div key={s.label} className={`bg-white rounded-xl border ${s.border} p-5`}>
