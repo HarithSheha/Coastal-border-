@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<!-- saved from url=(0253)https://303ea521-09e5-47c8-84d5-39e62485b0ab.frame.claudeusercontent.com/_f/1783306929-5d6e/?__frame_t=Lk_XcByJybGcZPjNUuSXljpx.50a75a58-ff53-4af7-a2a9-5f513d141ed8.1c427a91-f6b8-4383-9b62-b60fc44c68d9.1783310614&__frame_v=manifest.bda96bdb5ebc99bf.json -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><!-- frame-runtime --><!--<base href="/_f/1783306929-5d6e/">--><base href="."><script>window.__FRAME_PREAMBLE={"capabilities":{"mcp":"mcp.BQqQVVN_.js"},"transforms":"_transforms.DYk1Ltlh.js"}</script><script>(function(){"use strict";const J="modulepreload",K=function(e){return"/"+e},V={},N=function(t,n,u){let o=Promise.resolve();function i(f){const a=new Event("vite:preloadError",{cancelable:!0});if(a.payload=f,window.dispatchEvent(a),!a.defaultPrevented)throw f}return o.then(f=>{for(const a of f||[])a.status==="rejected"&&i(a.reason);return t().catch(i)})},$=["light","dark","system"];function q(e){if(e==null||typeof e!="object")return!1;const t=e.__frame_init;return t!=null&&typeof t=="object"}function I(e){if(e==null||typeof e!="object")return!1;const t=e.__frame_theme;if(t==null||typeof t!="object")return!1;const n=t.theme;return typeof n=="string"&&$.includes(n)}function S(e){if(window===top||e.type==="auxclick"&&e.button!==1)return;const t=e.composedPath?e.composedPath():[e.target];let n=null;for(let f=0;f<t.length;f++){const a=t[f];if(a&&a.matches&&a.matches("a[href],area[href]")){n=a;break}}if(!n&&e.target&&e.target.closest&&(n=e.target.closest("a[href],area[href]")),!n)return;const u=n.getAttribute("href");if(!u)return;let o,i;try{o=new URL(u,document.baseURI),i=new URL(document.baseURI).origin}catch{return}(o.protocol==="http:"||o.protocol==="https:")&&o.origin!==i&&(e.preventDefault(),parent.postMessage({__frame_nav:!0,url:o.href},"*"))}const L={};function v(e){if(window===top)return;const t=Date.now();t-(L[e]||0)<500||(L[e]=t,parent.postMessage({__frame_engaged:!0,kind:e},"*"))}function U(){addEventListener("click",S,!0),addEventListener("auxclick",S,!0)}function D(){addEventListener("scroll",()=>v("scroll"),{capture:!0,passive:!0}),addEventListener("pointermove",()=>v("pointer"),{capture:!0,passive:!0}),addEventListener("click",()=>v("click"),{capture:!0,passive:!0})}function F(e,t,n){const u=[...t.values()].filter(o=>o.targets.some(i=>i.startsWith(e+".")));return{wrap(o,i){const f=`${e}.${o}`,a=u.filter(s=>s.targets.includes(f));return a.length===0?(...s)=>{try{return i(...s)}catch(d){return Promise.reject(d)}}:(...s)=>{let d=s;for(const c of a){const l=c.module.parameters;if(l)try{d=l(d)}catch{return Promise.reject({code:"transform_error",id:c.id,scope:e,message:"parameters transform failed"})}}let m;try{m=i(...d)}catch(c){m=Promise.reject(c)}return m.then(c=>{for(let l=a.length-1;l>=0;l--){const g=a[l],p=g.module.returns;if(p)try{c=p(c)}catch{return n({id:g.id,scope:e,leg:"returns"}),c}}return c},c=>{for(let l=a.length-1;l>=0;l--){const g=a[l],p=g.module.throws;if(p)try{c=p(c)}catch{return n({id:g.id,scope:e,leg:"throws"}),Promise.reject(c)}}return Promise.reject(c)})}}}}function B(e,t,n,u=()=>{}){const o=new Set(e.changes??[]),i=new Map;for(const f of o){const a=t[f];a&&i.set(f,a)}return{contract:e.contract,changes:o,flags:new Set(e.flags??[]),capabilities:e.capabilities??{},transforms:i,shellOrigin:n.shellOrigin,mount:n.mount,pipe:f=>F(f,i,u)}}(function(){const e=Object.defineProperty,t=globalThis,n=["RTCPeerConnection","webkitRTCPeerConnection","RTCDataChannel","RTCIceCandidate","RTCSessionDescription","RTCRtpSender","RTCRtpReceiver"];let u=0;for(let o=0;o<n.length;o++){const i=n[o];try{e(t,i,{value:void 0,writable:!1,configurable:!1})}catch{try{delete t[i]}catch{}try{e(t,i,{value:void 0,writable:!1,configurable:!0})}catch{}}typeof t[i]=="function"&&u++}if(u&&window!==top)try{parent.postMessage({__frame_rtc_lockdown_failed:u},"*")}catch{}})();const z=1e4,x=Object.freeze([...window.__FRAME_PREAMBLE?.origins??["https://claude.ai","https://preview.claude.ai"]]);function W(e){for(const t of x)if(t.endsWith(":*"))try{const n=new URL(e);if(`${n.protocol}//${n.hostname}:*`===t)return!0}catch{}else if(e===t)return!0;return!1}const b=Object.freeze({...window.__FRAME_PREAMBLE?.capabilities??{}}),E=window.__FRAME_PREAMBLE?.transforms,k=/^[\w.-]+\.js$/,H=/^[a-z][a-z0-9_-]{0,63}$/;let C=null,h=null;function P(e,t,n){try{Object.defineProperty(e,t,{value:n,writable:!1,configurable:!1,enumerable:!0})}catch{try{Object.defineProperty(e,t,{value:n,writable:!1,configurable:!0,enumerable:!0})}catch{}}}let R=!1;function A(e){const t=document.documentElement;e==="light"||e==="dark"?(t.dataset.theme=e,t.style.colorScheme=e,R=!0):R&&(delete t.dataset.theme,t.style.colorScheme="",R=!1)}const _=new Map;function G(e,t){const n=_.get(e);if(!n)return;Object.assign(n.impl,t),n.impl.__settled=()=>Promise.reject({code:"capability_removed",message:`${e}: method not in this runtime`});const u=n.queue;n.queue=[];for(const o of u){const i=t[o.method];i?i(...o.args).then(o.resolve,o.reject):o.reject({code:"capability_removed",message:`${e}.${o.method} is not in this runtime`})}}function j(e,t){const n=_.get(e);if(!n)return;n.impl.__settled=()=>Promise.reject(t);const u=n.queue;n.queue=[];for(const o of u)o.reject(t)}const O=Object.getOwnPropertyDescriptor(window,"claude");if(window!==top&&!(O&&O.writable===!1)){U(),D();const e=O?.value??{};P(window,"claude",e);const t=s=>{const d={impl:Object.create(null),queue:[]};_.set(s,d);const m=new Proxy(d.impl,{get:(c,l)=>{if(typeof l=="string"&&!(l==="then"||l==="toJSON"||l==="valueOf"))return l==="toString"?Object.prototype.toString:(...g)=>{const p=c[l]??c.__settled;return p?p(...g):new Promise((w,M)=>{d.queue.push({method:l,args:g,resolve:w,reject:M})})}},set:()=>!1});P(e,s,m)};for(const s of Object.keys(b)){if(e[s]!==void 0){P(e,s,e[s]);continue}t(s)}let n=null,u=null,o=0;const i=s=>{s.source!==parent||!W(s.origin)||q(s.data)&&(n=s.data.__frame_init,h=s.origin,removeEventListener("message",i),clearTimeout(o),u?.())};addEventListener("message",i),parent.postMessage({__frame_connect:!0},"*");const f=new Promise(s=>{u=s,o=setTimeout(()=>{removeEventListener("message",i),s()},z)}),a=document.readyState==="loading"?new Promise(s=>document.addEventListener("DOMContentLoaded",()=>s(),{once:!0})):Promise.resolve();f.then(async()=>{if(!n||!h){for(const r of _.keys())j(r,{code:"not_granted",message:"frame initialization did not arrive - capability unavailable"});return}A(n.theme);const s=h;addEventListener("message",r=>{r.source!==parent||r.origin!==s||I(r.data)&&A(r.data.__frame_theme.theme)});const d=r=>N(()=>import("/_runtime/"+r),void 0),m=Object.keys(n.capabilities??{});for(const r of m)Object.hasOwn(b,r)||H.test(r)&&e[r]===void 0&&(t(r),j(r,{code:"capability_disabled",message:"capability not in this runtime generation"}));const c=m.filter(r=>Object.hasOwn(b,r)).map(r=>[r,b[r]]).filter(r=>typeof r[1]=="string"&&k.test(r[1])),[l,...g]=await Promise.allSettled([E&&k.test(E)?d(E):Promise.resolve({}),...c.map(([,r])=>d(r))]),p=h;C=B(n,l.status==="fulfilled"&&l.value?.TRANSFORMS||{},{shellOrigin:p,mount:G},r=>parent.postMessage({__frame_cap_telemetry:r},p));const w=r=>parent.postMessage({__frame_cap_telemetry:{kind:"cap-load-error",cap:r}},p),M=C;g.forEach((r,y)=>{const T=c[y][0];if(r.status!=="fulfilled"){w(T);return}try{r.value?.install?.(M)}catch{w(T)}});for(const[r,y]of _)y.queue.length===0&&Object.keys(y.impl).length>0||j(r,{code:m.includes(r)?"capability_disabled":"not_granted",message:"capability not available in this session"});await a,parent.postMessage({__frame_ready:!0},h)})}})();</script><!-- /frame-runtime --><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+
+<title>CBS — Database Seed &amp; Login Setup Guide</title>
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --navy:       #1a2744;
+    --navy-mid:   #243560;
+    --gold:       #c9a227;
+    --gold-light: #f0d060;
+    --cream:      #f7f5ef;
+    --paper:      #ffffff;
+    --ink:        #1a1f2e;
+    --ink-body:   #374060;
+    --ink-muted:  #6b7899;
+    --code-bg:    #eaecf4;
+    --code-border:#cdd2e8;
+    --success-bg: #ecfdf5;
+    --success-bd: #6ee7b7;
+    --warn-bg:    #fffbeb;
+    --warn-bd:    #fcd34d;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--ink-body);
+    font-size: 14px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Page wrapper ── */
+  .page {
+    max-width: 720px;
+    margin: 32px auto;
+    background: var(--paper);
+    box-shadow: 0 2px 24px rgba(26,39,68,.14);
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--navy);
+    padding: 28px 40px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 18px,
+      rgba(201,162,39,.04) 18px,
+      rgba(201,162,39,.04) 19px
+    );
+    pointer-events: none;
+  }
+  .header-gold-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+    margin-bottom: 20px;
+    border-radius: 2px;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .badge-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.4);
+  }
+  .header-text { flex: 1; }
+  .org-name {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13px;
+    font-weight: normal;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .doc-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffffff;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  .doc-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(201,162,39,.25);
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label {
+    font-size: 9px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(201,162,39,.7);
+  }
+  .meta-value {
+    font-size: 12px;
+    color: rgba(255,255,255,.85);
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── Body ── */
+  .body { padding: 36px 40px 40px; }
+
+  /* ── Notice box ── */
+  .notice {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-bd);
+    border-left: 4px solid #f59e0b;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 28px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .notice-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 30px; }
+  .section-heading {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--navy);
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--gold);
+    font-family: Georgia, serif;
+    font-size: 13px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Step ── */
+  .step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  .step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .step-content { flex: 1; }
+  .step-label {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+  .step-desc {
+    font-size: 13px;
+    color: var(--ink-body);
+    margin-bottom: 8px;
+  }
+
+  /* ── Code block ── */
+  .cmd {
+    background: var(--navy);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: #a5f3fc;
+    overflow-x: auto;
+    position: relative;
+  }
+  .cmd .prompt { color: var(--gold); user-select: none; }
+  .cmd .comment { color: #64748b; }
+
+  .inline-code {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: var(--navy);
+  }
+
+  /* ── Success output ── */
+  .output {
+    background: var(--success-bg);
+    border: 1px solid var(--success-bd);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: #065f46;
+    margin-top: 6px;
+  }
+  .output-label {
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #6ee7b7;
+    margin-bottom: 4px;
+    font-family: sans-serif;
+    font-weight: 600;
+  }
+
+  /* ── Credentials table ── */
+  .cred-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .cred-table thead tr {
+    background: var(--navy);
+    color: var(--gold);
+  }
+  .cred-table th {
+    padding: 9px 14px;
+    text-align: left;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-weight: normal;
+  }
+  .cred-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #e8ecf4;
+    color: var(--ink-body);
+  }
+  .cred-table tbody tr:last-child td { border-bottom: none; }
+  .cred-table tbody tr:nth-child(even) td { background: #f5f7fc; }
+  .cred-table td:first-child {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--navy-mid);
+  }
+  .cred-table td:nth-child(2) {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: #374060;
+  }
+  .badge-role {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .05em;
+  }
+  .role-admin { background: #fef3c7; color: #92400e; }
+  .role-officer { background: #dbeafe; color: #1e40af; }
+
+  /* ── URL box ── */
+  .url-box {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .url-icon { font-size: 18px; }
+  .url-text {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    color: var(--navy);
+    font-weight: bold;
+  }
+  .url-desc { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
+  /* ── Divider ── */
+  .divider {
+    border: none;
+    border-top: 1px solid #e2e6f0;
+    margin: 28px 0;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    background: var(--navy);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-text {
+    font-size: 11px;
+    color: rgba(201,162,39,.65);
+    letter-spacing: .08em;
+  }
+  .footer-stamp {
+    font-family: Georgia, serif;
+    font-size: 11px;
+    color: rgba(255,255,255,.35);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; }
+    .cmd, .output { border: 1px solid #ccc; }
+    .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cred-table thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section-num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <div class="header-gold-bar"></div>
+    <div class="header-top">
+      <div class="badge-circle">⚓</div>
+      <div class="header-text">
+        <p class="org-name">Coastal Border Security — Internal Documentation</p>
+        <h1 class="doc-title">Database Seed &amp; Login Setup Guide</h1>
+      </div>
+    </div>
+    <div class="doc-meta">
+      <div class="meta-item">
+        <span class="meta-label">Document Ref</span>
+        <span class="meta-value">CBS-DEV-001</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">System</span>
+        <span class="meta-value">Laravel 13 + MySQL</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Frontend</span>
+        <span class="meta-value">React + Vite (localhost:5173)</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Backend</span>
+        <span class="meta-value">localhost:8000</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── BODY ── -->
+  <div class="body">
+
+    <div class="notice">
+      <span class="notice-icon">⚠</span>
+      <span>Complete all steps in order. MySQL <strong>must be running</strong> before executing any artisan commands, otherwise the commands will fail with a connection error.</span>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="section">
+      <h2 class="section-heading">
+        <span class="section-num">1</span>
+        Start MySQL (XAMPP)
+      </h2>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Open the XAMPP Control Panel</p>
+          <p class="step-desc">Navigate to your XAMPP installation and run the control panel, or use the start script directly:</p>
+          <div class="cmd">
+            <span class="prompt">C:\xampp&gt; </span>mysql_start.bat
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Verify MySQL is running</p>
+          <p class="step-desc">Open a new terminal and confirm port 3306 is listening:</p>
+          <div class="cmd">
+            <span class="prompt">PS&gt; </span>netstat -ano | findstr ":3306"
+          </div>
+          <div class="output">
+            <div class="output-label">Expected output</div>
+            TCP&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:3306&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTENING
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="section">
+      <h2 class="section-heading">
+        <span class="section-num">2</span>
+        Open the Backend Directory
+      </h2>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Navigate to the Laravel project folder</p>
+          <p class="step-desc">Open PowerShell or Command Prompt and change into the backend directory:</p>
+          <div class="cmd">
+            <span class="prompt">PS&gt; </span>cd "C:\Users\dulas\Desktop\SEPTEMBER KISW MONTHLY TEST\A2 HISTRY PASTPAPER\Documents\Dev\costal-back\Coastal-Border-backend"
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="section">
+      <h2 class="section-heading">
+        <span class="section-num">3</span>
+        Run the Database Migration
+      </h2>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Apply all pending migrations</p>
+          <p class="step-desc">This creates the <span class="inline-code">users</span>, <span class="inline-code">zones</span>, <span class="inline-code">sensors</span>, <span class="inline-code">live_reports</span>, and all other required tables:</p>
+          <div class="cmd">
+            <span class="prompt">PS&gt; </span>php artisan migrate
+          </div>
+          <div class="output">
+            <div class="output-label">Expected output</div>
+            INFO&nbsp; Running migrations.<br>
+            &nbsp;2026_07_06_000001_add_auth_fields_to_users_table .. DONE
+          </div>
+          <p style="font-size:12px;color:#6b7899;margin-top:8px;">
+            If you see "Nothing to migrate", the migrations already ran — that is fine, proceed to Step 4.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="section">
+      <h2 class="section-heading">
+        <span class="section-num">4</span>
+        Seed the Database
+      </h2>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Seed users only (recommended first run)</p>
+          <p class="step-desc">Creates the four login accounts without overwriting existing zone/sensor/report data:</p>
+          <div class="cmd">
+            <span class="prompt">PS&gt; </span>php artisan db:seed --class=UserSeeder
+          </div>
+          <div class="output">
+            <div class="output-label">Expected output</div>
+            INFO&nbsp; Seeding database.<br>
+            &nbsp;Users seeded:<br>
+            &nbsp;&nbsp;admin&nbsp;&nbsp;&nbsp;/ admin123&nbsp;&nbsp;&nbsp;(Administrator)<br>
+            &nbsp;&nbsp;mwangi&nbsp;&nbsp;/ officer123 (Officer)<br>
+            &nbsp;&nbsp;achieng / officer123 (Officer)<br>
+            &nbsp;&nbsp;otieno&nbsp;&nbsp;/ officer123 (Officer)
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Seed all data (fresh install only)</p>
+          <p class="step-desc">Seeds users, zones, sensors, live reports, and sensor readings. Use this only on a <strong>fresh database</strong> — it will duplicate records if run again:</p>
+          <div class="cmd">
+            <span class="prompt">PS&gt; </span>php artisan db:seed
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- CREDENTIALS TABLE -->
+    <div class="section">
+      <h2 class="section-heading">
+        <span class="section-num">5</span>
+        Login Credentials
+      </h2>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:12px;">
+        Use any of the accounts below on the login screen at <span class="inline-code">http://localhost:5173</span>.
+      </p>
+
+      <table class="cred-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Role</th>
+            <th>Full Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>admin</td>
+            <td>admin123</td>
+            <td><span class="badge-role role-admin">Administrator</span></td>
+            <td>System Administrator</td>
+          </tr>
+          <tr>
+            <td>mwangi</td>
+            <td>officer123</td>
+            <td><span class="badge-role role-officer">Officer</span></td>
+            <td>Officer Mwangi</td>
+          </tr>
+          <tr>
+            <td>achieng</td>
+            <td>officer123</td>
+            <td><span class="badge-role role-officer">Officer</span></td>
+            <td>Sgt. Achieng</td>
+          </tr>
+          <tr>
+            <td>otieno</td>
+            <td>officer123</td>
+            <td><span class="badge-role role-officer">Officer</span></td>
+            <td>Cpl. Otieno</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 6 — Start servers -->
+    <div class="section">
+      <h2 class="section-heading">
+        <span class="section-num">6</span>
+        Start Both Servers
+      </h2>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Terminal 1 — Laravel backend</p>
+          <div class="cmd">
+            <span class="prompt">PS&gt; </span>php artisan serve
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Terminal 2 — React frontend</p>
+          <div class="cmd">
+            <span class="prompt">PS&gt; </span>npm run dev
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-content">
+          <p class="step-label">Open the dashboard in your browser</p>
+          <div class="url-box">
+            <span class="url-icon">🌐</span>
+            <div>
+              <div class="url-text">http://localhost:5173</div>
+              <div class="url-desc">The login screen will appear. Enter username and password from the table above.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <span class="footer-text">CBS-DEV-001 · Internal Use Only · Do not distribute</span>
+    <span class="footer-stamp">Coastal Border Security</span>
+  </footer>
+
+</div><!-- /page -->
+
+</body></html>

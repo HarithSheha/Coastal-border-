@@ -139,7 +139,7 @@ export default function LoginPage({ onLogin }: Props) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: 'linear-gradient(135deg, #0d1f3c 0%, #1a3564 50%, #0d1f3c 100%)' }}>
+      style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%)' }}>
 
       {/* Subtle grid overlay */}
       <div className="absolute inset-0 opacity-5"
@@ -148,7 +148,7 @@ export default function LoginPage({ onLogin }: Props) {
       <div className="relative w-full max-w-md">
         {/* Card */}
         <div className="rounded-2xl overflow-hidden shadow-2xl"
-          style={{ background: 'linear-gradient(180deg,#142040 0%,#0f1c38 100%)', border: '1px solid rgba(201,162,39,0.3)' }}>
+          style={{ background: 'linear-gradient(180deg,#1e3a5f 0%,#152744 100%)', border: '1px solid rgba(201,162,39,0.4)' }}>
 
           {/* Gold top accent bar */}
           <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg,#c9a227,#f0d060,#c9a227)' }} />
@@ -156,11 +156,12 @@ export default function LoginPage({ onLogin }: Props) {
           <div className="px-8 py-8">
             {/* Logo */}
             <div className="flex flex-col items-center mb-7">
-              <div className="w-36 h-36 mb-5 drop-shadow-2xl">
+              <div className="w-48 h-48 mb-5 rounded-full flex items-center justify-center"
+                style={{ background: 'white', padding: '6px', boxShadow: '0 0 0 3px #c9a227, 0 8px 32px rgba(0,0,0,0.5)' }}>
                 <img
                   src="/logo.png"
                   alt="Coastal Border Security"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain rounded-full"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block'; }}
                 />
                 <div style={{ display: 'none' }} className="w-full h-full">
@@ -204,7 +205,7 @@ export default function LoginPage({ onLogin }: Props) {
                     placeholder="Enter your username"
                     className="w-full pl-10 pr-4 py-3 rounded-lg text-sm outline-none transition-all"
                     style={{
-                      background: '#0a1628',
+                      background: '#0d1f3c',
                       border: '1px solid rgba(201,162,39,0.3)',
                       color: '#e2e8f0',
                       caretColor: '#c9a227',
@@ -234,7 +235,7 @@ export default function LoginPage({ onLogin }: Props) {
                     placeholder="Enter your password"
                     className="w-full pl-10 pr-12 py-3 rounded-lg text-sm outline-none transition-all"
                     style={{
-                      background: '#0a1628',
+                      background: '#0d1f3c',
                       border: '1px solid rgba(201,162,39,0.3)',
                       color: '#e2e8f0',
                       caretColor: '#c9a227',
@@ -296,19 +297,6 @@ export default function LoginPage({ onLogin }: Props) {
                 ) : 'Sign In'}
               </button>
             </form>
-
-            {/* Sample accounts hint */}
-            <div className="mt-5 pt-4" style={{ borderTop: '1px solid rgba(201,162,39,0.15)' }}>
-              <p className="text-xs text-center mb-2" style={{ color: '#4a6080' }}>Demo credentials</p>
-              <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: '#4a6080' }}>
-                <div className="px-2 py-1.5 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <span style={{ color: '#c9a22790' }}>admin</span> / admin123
-                </div>
-                <div className="px-2 py-1.5 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <span style={{ color: '#c9a22790' }}>mwangi</span> / officer123
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Footer */}
