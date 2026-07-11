@@ -36,9 +36,9 @@ export default function Header({ page, criticalCount, onRefresh, refreshing }: P
         </button>
         <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
           <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-white text-xs font-semibold">
-            A
+            
           </div>
-          <span className="text-sm text-slate-700 font-medium">Admin</span>
+          <span className="text-sm text-slate-700 font-medium"></span>
         </div>
       </div>
     </header>

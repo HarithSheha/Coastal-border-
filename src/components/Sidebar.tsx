@@ -27,7 +27,7 @@ export default function Sidebar({ current, onChange, alertCount }: Props) {
           </div>
           <div>
             <p className="text-yellow-400 font-bold text-sm leading-tight">SecureZone</p>
-            <p className="text-slate-400 text-xs">Admin Dashboard</p>
+            <p className="text-slate-400 text-xs">Staff  Dashboard</p>
           </div>
         </div>
       </div>
