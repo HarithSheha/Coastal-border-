@@ -33,6 +33,7 @@ export interface Sensor {
   y_percent: number;
   metadata: Record<string, unknown>;
   created_at: string;
+  zone?: Zone;
   zones?: Zone;
 }
 
@@ -64,6 +65,34 @@ export interface SensorReading {
   unit: string;
   triggered: boolean;
   recorded_at: string;
+  sensor?: Sensor;
+}
+
+export interface Urgency {
+  urgency_id: number;
+  urgency_level: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FieldReport {
+  report_id: number;
+  date: string;
+  latitude: string;
+  longitude: string;
+  address: string;
+  zone_id: string;
+  color: string;
+  number_of_people: number;
+  description: string | null;
+  photo: string | null;
+  name: string;
+  phone: string;
+  urgency_id: number;
+  created_at: string;
+  updated_at: string;
+  zone?: Zone;
+  urgency?: Urgency;
 }
 
 export interface Database {

@@ -8,7 +8,7 @@ interface Props {
   reports: Report[];
   sensors: Sensor[];
   zones: Zone[];
-  onNavigate: (page: 'reports' | 'sensors' | 'zones' | 'map') => void;
+  onNavigate: (page: 'reports' | 'liveReports' | 'sensors' | 'zones' | 'map') => void;
 }
 
 export default function Dashboard({ reports, sensors, zones, onNavigate }: Props) {

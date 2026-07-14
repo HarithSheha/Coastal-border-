@@ -66,4 +66,20 @@ export const api = {
     list:   (params?: string)         => request(`/sensor-readings${params || ''}`),
     create: (d: any)                  => request('/sensor-readings', { method: 'POST', body: JSON.stringify(d) }),
   },
+
+  uploadPhoto: async (file: File): Promise<{ filename: string; url: string }> => {
+    const token = getToken();
+    const form  = new FormData();
+    form.append('photo', file);
+    const res = await fetch(`${BASE_URL}/upload-photo`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      body: form,
+    });
+    if (!res.ok) throw new Error(`Upload failed ${res.status}`);
+    return res.json();
+  },
 };

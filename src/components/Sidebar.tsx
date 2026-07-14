@@ -1,6 +1,6 @@
-import { LayoutDashboard, FileText, Map, BarChart3, Shield, Radio, AlertTriangle } from 'lucide-react';
+import { LayoutDashboard, FileText, Map, BarChart3, Shield, Radio, AlertTriangle, Activity } from 'lucide-react';
 
-export type Page = 'dashboard' | 'reports' | 'map' | 'analytics' | 'sensors' | 'zones';
+export type Page = 'dashboard' | 'reports' | 'liveReports' | 'map' | 'analytics' | 'sensors' | 'zones';
 
 interface Props {
   current: Page;
@@ -9,12 +9,13 @@ interface Props {
 }
 
 const nav: { id: Page; label: string; icon: React.ReactNode }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-  { id: 'reports', label: 'Reports', icon: <FileText size={18} /> },
-  { id: 'map', label: 'Live Reports', icon: <Map size={18} /> },
-  { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
-  { id: 'sensors', label: 'Sensors', icon: <Radio size={18} /> },
-  { id: 'zones', label: 'Restricted Zones', icon: <Shield size={18} /> },
+  { id: 'dashboard',   label: 'Dashboard',          icon: <LayoutDashboard size={18} /> },
+  { id: 'reports',     label: 'Reports',              icon: <FileText size={18} /> },
+  { id: 'liveReports', label: 'Live Reports',         icon: <Activity size={18} /> },
+  { id: 'map',         label: 'Live Map',             icon: <Map size={18} /> },
+  { id: 'analytics',   label: 'Analytics',            icon: <BarChart3 size={18} /> },
+  { id: 'sensors',     label: 'Sensors',              icon: <Radio size={18} /> },
+  { id: 'zones',       label: 'Restricted Zones',     icon: <Shield size={18} /> },
 ];
 
 export default function Sidebar({ current, onChange, alertCount }: Props) {
@@ -27,7 +28,7 @@ export default function Sidebar({ current, onChange, alertCount }: Props) {
           </div>
           <div>
             <p className="text-yellow-400 font-bold text-sm leading-tight">SecureZone</p>
-            <p className="text-slate-400 text-xs">Staff  Dashboard</p>
+            <p className="text-slate-400 text-xs">Staff Dashboard</p>
           </div>
         </div>
       </div>
@@ -45,7 +46,7 @@ export default function Sidebar({ current, onChange, alertCount }: Props) {
           >
             <span className={current === id ? 'text-red-400' : ''}>{icon}</span>
             <span>{label}</span>
-            {id === 'reports' && alertCount > 0 && (
+            {id === 'liveReports' && alertCount > 0 && (
               <span className="ml-auto bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
                 {alertCount}
               </span>

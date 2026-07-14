@@ -3,6 +3,7 @@ import Sidebar, { type Page } from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import Reports from './pages/Reports';
+import LiveReports from './pages/LiveReports';
 import LiveMap from './pages/LiveMap';
 import Analytics from './pages/Analytics';
 import Sensors from './pages/Sensors';
@@ -134,33 +135,17 @@ export default function App() {
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar current={page} onChange={setPage} alertCount={openAlertCount} />
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header with logout */}
-        <div className="relative">
-          <Header page={page} criticalCount={criticalCount} onRefresh={() => fetchData(true)} refreshing={refreshing} />
-          {/* Logout button positioned in header top-right */}
-          <div className="absolute top-0 right-0 h-full flex items-center pr-4 gap-3">
-            <span className="text-xs text-slate-500 hidden sm:block">
-              {user.name} <span className="text-slate-400">({user.role})</span>
-            </span>
-            <button
-              onClick={handleLogout}
-              title="Sign out"
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-500 transition-colors px-2.5 py-1.5 rounded-md hover:bg-red-50"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Sign out
-            </button>
-          </div>
-        </div>
+        <Header page={page} criticalCount={criticalCount} onRefresh={() => fetchData(true)} refreshing={refreshing} onLogout={handleLogout} />
 
         <main className="flex-1 overflow-auto">
           {page === 'dashboard' && (
             <Dashboard reports={reports} sensors={sensors} zones={zones} onNavigate={(p) => setPage(p)} />
           )}
           {page === 'reports' && (
-            <Reports reports={reports} onUpdate={() => fetchData()} />
+            <Reports zones={zones} />
+          )}
+          {page === 'liveReports' && (
+            <LiveReports />
           )}
           {page === 'map' && (
             <LiveMap zones={zones} sensors={sensors} reports={reports} />
