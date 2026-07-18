@@ -10,7 +10,7 @@ import Sensors from './pages/Sensors';
 import Zones from './pages/Zones';
 import LoginPage, { type AuthUser } from './pages/LoginPage';
 import { api } from './lib/api';
-import type { Report, Sensor, Zone } from './lib/types';
+import type { FieldReport, SensorReading, Sensor, Zone } from './lib/types';
 
 function getStoredUser(): AuthUser | null {
   try {
@@ -27,7 +27,8 @@ export default function App() {
   const [mapTarget, setMapTarget] = useState<MapTarget | null>(null);
   const [reportCount, setReportCount]         = useState(0);
   const [liveReportCount, setLiveReportCount] = useState(0);
-  const [reports, setReports] = useState<Report[]>([]);
+  const [fieldReports, setFieldReports] = useState<FieldReport[]>([]);
+  const [readings, setReadings]         = useState<SensorReading[]>([]);
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [zones, setZones]     = useState<Zone[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -37,12 +38,14 @@ export default function App() {
   const fetchData = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     try {
-      const [reportData, sensorData, zoneData] = await Promise.all([
-        api.liveReports.list(),
+      const [fieldReportData, readingData, sensorData, zoneData] = await Promise.all([
+        api.reports.list(),
+        api.readings.list(),
         api.sensors.list(),
         api.zones.list(),
       ]);
-      if (reportData) setReports(reportData);
+      if (Array.isArray(fieldReportData)) setFieldReports(fieldReportData);
+      if (Array.isArray(readingData))     setReadings(readingData);
       if (sensorData) setSensors(sensorData);
       if (zoneData)   setZones(zoneData);
       setError(null);
@@ -75,7 +78,8 @@ export default function App() {
     localStorage.removeItem('cbs_token');
     localStorage.removeItem('cbs_user');
     setUser(null);
-    setReports([]);
+    setFieldReports([]);
+    setReadings([]);
     setSensors([]);
     setZones([]);
     setLoading(true);
@@ -92,7 +96,7 @@ export default function App() {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-  const criticalCount = reports.filter(r => r.severity === 'critical' && r.status === 'open').length;
+  const criticalCount = sensors.filter(s => s.status === 'alert').length;
 
   if (loading) {
     return (
@@ -146,7 +150,7 @@ export default function App() {
 
         <main className="flex-1 overflow-auto">
           {page === 'dashboard' && (
-            <Dashboard reports={reports} sensors={sensors} zones={zones} onNavigate={(p) => setPage(p)} />
+            <Dashboard fieldReports={fieldReports} readings={readings} sensors={sensors} zones={zones} onNavigate={(p) => setPage(p)} />
           )}
           {page === 'reports' && (
             <Reports zones={zones} onOpenInMap={handleOpenInMap} onUnresolvedCount={setReportCount} />
@@ -158,7 +162,7 @@ export default function App() {
             <LiveMap zones={zones} sensors={sensors} mapTarget={mapTarget} onMapTargetConsumed={() => setMapTarget(null)} />
           )}
           {page === 'analytics' && (
-            <Analytics reports={reports} sensors={sensors} />
+            <Analytics fieldReports={fieldReports} readings={readings} sensors={sensors} />
           )}
           {page === 'sensors' && (
             <Sensors sensors={sensors} zones={zones} onUpdate={() => fetchData()} />

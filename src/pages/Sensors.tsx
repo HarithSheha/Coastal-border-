@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Plus, X, Thermometer, Camera, Activity, Wind, Flame, Radio,
-  AlertTriangle, Wifi, WifiOff, Battery, Clock, Trash2, TrendingUp,
+  AlertTriangle, Wifi, WifiOff, Clock, Trash2, TrendingUp,
 } from 'lucide-react';
 import type { Sensor, Zone, SensorType, SensorStatus, SensorReading } from '../lib/types';
 import { sensorStatusBadge, sensorTypeLabel, formatRelativeTime, formatDateTime } from '../lib/utils';
@@ -208,27 +208,7 @@ export default function Sensors({ sensors, zones, onUpdate }: Props) {
                   <p className="text-xs text-slate-400 mt-1 truncate">Zone: {s.zones.name}</p>
                 )}
 
-                {/* Battery bar */}
-                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-100">
-                  <div className="flex items-center gap-1.5 flex-1">
-                    <Battery size={12} className={
-                      s.battery_level > 50 ? 'text-emerald-500' :
-                      s.battery_level > 20 ? 'text-amber-500' : 'text-red-500'
-                    } />
-                    <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          s.battery_level > 50 ? 'bg-emerald-500' :
-                          s.battery_level > 20 ? 'bg-amber-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${s.battery_level}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-slate-400 tabular-nums">{s.battery_level}%</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 mt-2">
+                <div className="flex items-center gap-1 mt-3 pt-3 border-t border-slate-100">
                   <Clock size={10} className="text-slate-300" />
                   <span className="text-xs text-slate-400">{formatRelativeTime(s.last_ping)}</span>
                 </div>
@@ -289,8 +269,7 @@ export default function Sensors({ sensors, zones, onUpdate }: Props) {
             {/* Info grid */}
             <div className="grid grid-cols-2 gap-3 text-xs">
               {[
-                { label: 'Status',    value: selected.status,               icon: statusIcon(selected.status) },
-                { label: 'Battery',   value: `${selected.battery_level}%`,  icon: <Battery size={13} /> },
+                { label: 'Status',    value: selected.status,                        icon: statusIcon(selected.status) },
                 { label: 'Last Ping', value: formatRelativeTime(selected.last_ping), icon: <Clock size={13} /> },
                 { label: 'Added',     value: formatDateTime(selected.created_at),    icon: <Clock size={13} /> },
               ].map(m => (

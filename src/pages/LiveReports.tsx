@@ -347,20 +347,8 @@ export default function LiveReports({ onUnresolvedCount }: Props) {
                       </div>
                     </div>
 
-                    {/* Battery + Zone */}
-                    <div className="grid grid-cols-2 divide-x divide-slate-100">
-                      <div className="px-4 py-3">
-                        <p className="text-[11px] text-slate-400 mb-1.5">Battery Level</p>
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${selected.sensor.battery_level > 50 ? 'bg-emerald-500' : selected.sensor.battery_level > 20 ? 'bg-amber-500' : 'bg-red-500'}`}
-                              style={{ width: `${selected.sensor.battery_level}%` }}
-                            />
-                          </div>
-                          <span className="text-xs font-bold text-slate-700 w-8 text-right">{selected.sensor.battery_level}%</span>
-                        </div>
-                      </div>
+                    {/* Zone */}
+                    <div className="grid grid-cols-1">
                       <div className="px-4 py-3">
                         <p className="text-[11px] text-slate-400 mb-1.5">Zone</p>
                         <p className="text-xs font-semibold text-slate-700 flex items-center gap-1">
