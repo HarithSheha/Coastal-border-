@@ -46,7 +46,30 @@ export const api = {
   reports: {
     list:   (params?: string)         => request(`/reports${params || ''}`),
     create: (d: any)                  => request('/reports',        { method: 'POST',   body: JSON.stringify(d) }),
+    createMultipart: async (form: FormData): Promise<any> => {
+      const token = getToken();
+      const res = await fetch(`${BASE_URL}/reports`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: form,
+      });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      return res.json();
+    },
     update: (id: number, d: any)      => request(`/reports/${id}`,  { method: 'PUT',    body: JSON.stringify(d) }),
+    uploadPhoto: async (id: number, file: File): Promise<any> => {
+      const token = getToken();
+      const form = new FormData();
+      form.append('photo', file);
+      form.append('_method', 'PUT');
+      const res = await fetch(`${BASE_URL}/reports/${id}`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: form,
+      });
+      if (!res.ok) throw new Error(`Upload failed ${res.status}`);
+      return res.json();
+    },
     remove: (id: number)              => request(`/reports/${id}`,  { method: 'DELETE' }),
   },
 
@@ -65,6 +88,7 @@ export const api = {
   readings: {
     list:   (params?: string)         => request(`/sensor-readings${params || ''}`),
     create: (d: any)                  => request('/sensor-readings', { method: 'POST', body: JSON.stringify(d) }),
+    update: (id: string, d: any)      => request(`/sensor-readings/${id}`, { method: 'PUT', body: JSON.stringify(d) }),
   },
 
   uploadPhoto: async (file: File): Promise<{ filename: string; url: string }> => {

@@ -21,28 +21,48 @@ const statusDot: Record<string, string> = {
   alert: 'bg-red-500 animate-pulse', maintenance: 'bg-amber-400',
 };
 
-export default function LiveReports() {
+interface Props { onUnresolvedCount?: (n: number) => void; }
+
+export default function LiveReports({ onUnresolvedCount }: Props) {
   const [readings, setReadings]     = useState<SensorReading[]>([]);
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selected, setSelected]     = useState<SensorReading | null>(null);
-  const [triggeredOnly, setTriggeredOnly] = useState(false);
   const [typeFilter, setTypeFilter] = useState<SensorType | ''>('');
   const [countdown, setCountdown]   = useState(REFRESH_INTERVAL);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [resolving, setResolving]   = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchReadings = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     try {
       const data = await api.readings.list('');
-      if (Array.isArray(data)) { setReadings(data); setLastUpdated(new Date()); }
+      if (Array.isArray(data)) {
+        setReadings(data);
+        setLastUpdated(new Date());
+        onUnresolvedCount?.(data.filter((r: SensorReading) => r.triggered && r.status === 'unresolved').length);
+      }
     } catch { /* stale data */ } finally {
       setLoading(false);
       if (isRefresh) setRefreshing(false);
       setCountdown(REFRESH_INTERVAL);
     }
-  }, []);
+  }, [onUnresolvedCount]);
+
+  async function resolveReading(r: SensorReading) {
+    const next = r.status === 'unresolved' ? 'resolved' : 'unresolved';
+    setResolving(true);
+    try {
+      await api.readings.update(r.id, { status: next });
+      setReadings(prev => {
+        const updated = prev.map(p => p.id === r.id ? { ...p, status: next } : p);
+        onUnresolvedCount?.(updated.filter(p => p.triggered && p.status === 'unresolved').length);
+        return updated;
+      });
+      setSelected(s => s ? { ...s, status: next } : s);
+    } finally { setResolving(false); }
+  }
 
   useEffect(() => {
     fetchReadings();
@@ -56,19 +76,18 @@ export default function LiveReports() {
   }, [fetchReadings]);
 
   /* analytics */
-  const alertCount   = readings.filter(r => r.triggered).length;
-  const normalCount  = readings.length - alertCount;
-  const uniqueSensors = new Set(readings.map(r => r.sensor_id)).size;
-  const lastDetection = readings.find(r => r.triggered);
+  const alertReadings = readings.filter(r => r.triggered);
+  const alertCount   = alertReadings.length;
+  const uniqueSensors = new Set(alertReadings.map(r => r.sensor_id)).size;
+  const lastDetection = alertReadings[0];
 
-  const filtered = readings.filter(r => {
-    if (triggeredOnly && !r.triggered) return false;
+  const filtered = alertReadings.filter(r => {
     if (typeFilter && r.sensor?.type !== typeFilter) return false;
     return true;
   });
 
   const { page, setPage, totalPages, pageItems } = usePagination(filtered, 12);
-  useEffect(() => { setPage(1); }, [triggeredOnly, typeFilter, setPage]);
+  useEffect(() => { setPage(1); }, [typeFilter, setPage]);
 
   const TYPES: SensorType[] = ['motion', 'thermal', 'camera', 'vibration', 'gas', 'smoke'];
 
@@ -76,27 +95,22 @@ export default function LiveReports() {
     <div className="flex flex-col h-full">
 
       {/* ── Analytics cards ── */}
-      <div className="px-6 pt-5 pb-3 grid grid-cols-4 gap-4 bg-slate-50 border-b border-slate-200">
-        <StatCard
-          icon={<Radio size={18} />}
-          label="Total Readings" value={readings.length} sub="sensor data points"
-          color="text-blue-600" bg="bg-blue-50"
-        />
+      <div className="px-6 pt-5 pb-3 grid grid-cols-3 gap-4 bg-slate-50 border-b border-slate-200">
         <StatCard
           icon={<Zap size={18} />}
-          label="Alert Detections" value={alertCount} sub={alertCount > 0 ? 'require attention' : 'all clear'}
+          label="Total Alerts" value={alertCount} sub="sensor data points"
           color="text-red-600" bg="bg-red-50"
           highlight={alertCount > 0}
         />
         <StatCard
           icon={<Activity size={18} />}
-          label="Normal Readings" value={normalCount} sub="no threshold breach"
-          color="text-emerald-600" bg="bg-emerald-50"
+          label="Sensors Reporting" value={uniqueSensors} sub="sensors with alerts"
+          color="text-amber-600" bg="bg-amber-50"
         />
         <StatCard
           icon={<TrendingUp size={18} />}
-          label="Sensors Reporting" value={uniqueSensors} sub={lastDetection ? `last alert ${formatRelativeTime(lastDetection.recorded_at)}` : 'no alerts yet'}
-          color="text-amber-600" bg="bg-amber-50"
+          label="Latest Alert" value={lastDetection ? 1 : 0} sub={lastDetection ? formatRelativeTime(lastDetection.recorded_at) : 'no alerts yet'}
+          color="text-blue-600" bg="bg-blue-50"
         />
       </div>
 
@@ -132,10 +146,6 @@ export default function LiveReports() {
             </div>
             <div className="flex items-center gap-2">
               <Filter size={13} className="text-slate-400" />
-              <button onClick={() => setTriggeredOnly(v => !v)}
-                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${triggeredOnly ? 'bg-red-600 text-white border-red-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-                <Zap size={12} /> Alerts Only
-              </button>
               <div className="relative">
                 <select value={typeFilter} onChange={e => setTypeFilter(e.target.value as SensorType | '')}
                   className={`appearance-none pl-3 pr-7 py-1.5 text-xs border rounded-lg focus:outline-none cursor-pointer ${typeFilter ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600'}`}>
@@ -144,8 +154,8 @@ export default function LiveReports() {
                 </select>
                 <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
-              {(triggeredOnly || typeFilter) && (
-                <button onClick={() => { setTriggeredOnly(false); setTypeFilter(''); }} className="text-xs text-slate-400 hover:text-slate-700">Clear</button>
+              {typeFilter && (
+                <button onClick={() => setTypeFilter('')} className="text-xs text-slate-400 hover:text-slate-700">Clear</button>
               )}
               <span className="ml-auto text-xs text-slate-400">{filtered.length} reading{filtered.length !== 1 ? 's' : ''}</span>
             </div>
@@ -166,8 +176,9 @@ export default function LiveReports() {
                       <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Sensor</th>
                       <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Zone</th>
                       <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Reading</th>
-                      <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Status</th>
-                      <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Detection</th>
+                      <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Sensor Status</th>
+                      <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Alert</th>
+                      <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Resolution</th>
                       <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Time</th>
                       <th className="px-4 py-3.5 w-10" />
                     </tr>
@@ -175,11 +186,9 @@ export default function LiveReports() {
                   <tbody className="divide-y divide-slate-100">
                     {pageItems.map((r, i) => (
                       <tr key={r.id}
-                        className={`group transition-colors border-l-4 ${r.triggered ? 'border-l-red-500' : 'border-l-transparent'} ${
+                        className={`group transition-colors border-l-4 border-l-red-500 ${
                           selected?.id === r.id ? 'bg-blue-50/70'
-                          : r.triggered         ? 'bg-red-50/40'
-                          : i % 2 === 0         ? 'bg-white'
-                          :                       'bg-slate-50/50'
+                          : 'bg-red-50/40'
                         }`}>
 
                         {/* Sensor */}
@@ -187,7 +196,7 @@ export default function LiveReports() {
                           <div className="flex items-center gap-2.5">
                             <span className="text-base leading-none">{r.sensor ? sensorTypeIcon[r.sensor.type] : '●'}</span>
                             <div className="min-w-0">
-                              <p className={`text-xs font-semibold truncate ${r.triggered ? 'text-red-800' : 'text-slate-800'}`}>
+                              <p className="text-xs font-semibold truncate text-red-800">
                                 {r.sensor?.name ?? 'Unknown Sensor'}
                               </p>
                               <p className="text-[11px] text-slate-400 capitalize">
@@ -207,7 +216,7 @@ export default function LiveReports() {
 
                         {/* Reading */}
                         <td className="px-4 py-3.5">
-                          <span className={`font-mono text-xs font-bold ${r.triggered ? 'text-red-700' : 'text-slate-800'}`}>
+                          <span className="font-mono text-xs font-bold text-red-700">
                             {r.value} <span className="font-normal text-slate-400">{r.unit}</span>
                           </span>
                         </td>
@@ -224,15 +233,21 @@ export default function LiveReports() {
 
                         {/* Alert badge */}
                         <td className="px-4 py-3.5">
-                          {r.triggered ? (
-                            <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-200 text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-                              <Zap size={10} /> ALERT
-                            </span>
-                          ) : (
-                            <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" /> Normal
-                            </span>
-                          )}
+                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-200 text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                            <Zap size={10} /> ALERT
+                          </span>
+                        </td>
+
+                        {/* Resolution status */}
+                        <td className="px-4 py-3.5">
+                          <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold ${
+                            r.status === 'resolved'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${r.status === 'resolved' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                            {r.status === 'resolved' ? 'Resolved' : 'Unresolved'}
+                          </span>
                         </td>
 
                         {/* Time */}
@@ -254,7 +269,7 @@ export default function LiveReports() {
                     ))}
                     {filtered.length === 0 && !loading && (
                       <tr>
-                        <td colSpan={7} className="py-16 text-center text-slate-400 text-sm">
+                        <td colSpan={8} className="py-16 text-center text-slate-400 text-sm">
                           {readings.length === 0 ? 'No sensor readings in the database yet.' : 'No readings match your filters.'}
                         </td>
                       </tr>
@@ -275,9 +290,19 @@ export default function LiveReports() {
                 <Activity size={15} className="text-slate-500" />
                 <h2 className="text-sm font-semibold text-slate-800">Detection Detail</h2>
               </div>
-              <button onClick={() => setSelected(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
-                <X size={15} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => resolveReading(selected)} disabled={resolving}
+                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors border disabled:opacity-50 ${
+                    selected.status === 'resolved'
+                      ? 'text-amber-600 hover:text-amber-800 hover:bg-amber-50 border-amber-200'
+                      : 'text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border-emerald-200'
+                  }`}>
+                  {resolving ? '…' : selected.status === 'resolved' ? '↩ Reopen' : '✓ Resolve'}
+                </button>
+                <button onClick={() => setSelected(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                  <X size={15} />
+                </button>
+              </div>
             </div>
 
             <div className="p-5 space-y-5">

@@ -5,20 +5,30 @@ export type Page = 'dashboard' | 'reports' | 'liveReports' | 'map' | 'analytics'
 interface Props {
   current: Page;
   onChange: (p: Page) => void;
-  alertCount: number;
+  reportCount: number;
+  liveReportCount: number;
 }
 
 const nav: { id: Page; label: string; icon: React.ReactNode }[] = [
-  { id: 'dashboard',   label: 'Dashboard',          icon: <LayoutDashboard size={18} /> },
-  { id: 'reports',     label: 'Reports',              icon: <FileText size={18} /> },
-  { id: 'liveReports', label: 'Live Reports',         icon: <Activity size={18} /> },
-  { id: 'map',         label: 'Live Map',             icon: <Map size={18} /> },
-  { id: 'analytics',   label: 'Analytics',            icon: <BarChart3 size={18} /> },
-  { id: 'sensors',     label: 'Sensors',              icon: <Radio size={18} /> },
-  { id: 'zones',       label: 'Restricted Zones',     icon: <Shield size={18} /> },
+  { id: 'dashboard',   label: 'Dashboard',        icon: <LayoutDashboard size={18} /> },
+  { id: 'reports',     label: 'Reports',           icon: <FileText size={18} /> },
+  { id: 'liveReports', label: 'Live Reports',      icon: <Activity size={18} /> },
+  { id: 'map',         label: 'Live Map',           icon: <Map size={18} /> },
+  { id: 'analytics',   label: 'Analytics',          icon: <BarChart3 size={18} /> },
+  { id: 'sensors',     label: 'Sensors',            icon: <Radio size={18} /> },
+  { id: 'zones',       label: 'Restricted Zones',   icon: <Shield size={18} /> },
 ];
 
-export default function Sidebar({ current, onChange, alertCount }: Props) {
+function Badge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="ml-auto bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center leading-none">
+      {count > 99 ? '99+' : count}
+    </span>
+  );
+}
+
+export default function Sidebar({ current, onChange, reportCount, liveReportCount }: Props) {
   return (
     <aside className="w-60 min-h-screen bg-slate-900 flex flex-col">
       <div className="px-5 py-5 border-b border-slate-800">
@@ -46,11 +56,8 @@ export default function Sidebar({ current, onChange, alertCount }: Props) {
           >
             <span className={current === id ? 'text-red-400' : ''}>{icon}</span>
             <span>{label}</span>
-            {id === 'liveReports' && alertCount > 0 && (
-              <span className="ml-auto bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
-                {alertCount}
-              </span>
-            )}
+            {id === 'reports'     && <Badge count={reportCount} />}
+            {id === 'liveReports' && <Badge count={liveReportCount} />}
           </button>
         ))}
       </nav>

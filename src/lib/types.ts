@@ -64,6 +64,7 @@ export interface SensorReading {
   value: number;
   unit: string;
   triggered: boolean;
+  status: string;
   recorded_at: string;
   sensor?: Sensor;
 }
@@ -86,9 +87,11 @@ export interface FieldReport {
   number_of_people: number;
   description: string | null;
   photo: string | null;
+  has_photo?: boolean;
   name: string;
   phone: string;
   urgency_id: number;
+  status: string;
   created_at: string;
   updated_at: string;
   zone?: Zone;

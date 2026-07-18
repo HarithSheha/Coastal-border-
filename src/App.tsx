@@ -4,7 +4,7 @@ import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import Reports from './pages/Reports';
 import LiveReports from './pages/LiveReports';
-import LiveMap from './pages/LiveMap';
+import LiveMap, { type MapTarget } from './pages/LiveMap';
 import Analytics from './pages/Analytics';
 import Sensors from './pages/Sensors';
 import Zones from './pages/Zones';
@@ -24,6 +24,9 @@ function getStoredUser(): AuthUser | null {
 export default function App() {
   const [user, setUser] = useState<AuthUser | null>(getStoredUser);
   const [page, setPage] = useState<Page>('dashboard');
+  const [mapTarget, setMapTarget] = useState<MapTarget | null>(null);
+  const [reportCount, setReportCount]         = useState(0);
+  const [liveReportCount, setLiveReportCount] = useState(0);
   const [reports, setReports] = useState<Report[]>([]);
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [zones, setZones]     = useState<Zone[]>([]);
@@ -79,13 +82,17 @@ export default function App() {
     setError(null);
   };
 
+  const handleOpenInMap = (lat: string, lng: string, label: string) => {
+    setMapTarget({ lat, lng, label });
+    setPage('map');
+  };
+
   // Show login page if not authenticated
   if (!user) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-  const openAlertCount = reports.filter(r => r.status === 'open').length;
-  const criticalCount  = reports.filter(r => r.severity === 'critical' && r.status === 'open').length;
+  const criticalCount = reports.filter(r => r.severity === 'critical' && r.status === 'open').length;
 
   if (loading) {
     return (
@@ -133,7 +140,7 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <Sidebar current={page} onChange={setPage} alertCount={openAlertCount} />
+      <Sidebar current={page} onChange={setPage} reportCount={reportCount} liveReportCount={liveReportCount} />
       <div className="flex-1 flex flex-col min-w-0">
         <Header page={page} criticalCount={criticalCount} onRefresh={() => fetchData(true)} refreshing={refreshing} onLogout={handleLogout} />
 
@@ -142,13 +149,13 @@ export default function App() {
             <Dashboard reports={reports} sensors={sensors} zones={zones} onNavigate={(p) => setPage(p)} />
           )}
           {page === 'reports' && (
-            <Reports zones={zones} />
+            <Reports zones={zones} onOpenInMap={handleOpenInMap} onUnresolvedCount={setReportCount} />
           )}
           {page === 'liveReports' && (
-            <LiveReports />
+            <LiveReports onUnresolvedCount={setLiveReportCount} />
           )}
           {page === 'map' && (
-            <LiveMap zones={zones} sensors={sensors} reports={reports} />
+            <LiveMap zones={zones} sensors={sensors} mapTarget={mapTarget} onMapTargetConsumed={() => setMapTarget(null)} />
           )}
           {page === 'analytics' && (
             <Analytics reports={reports} sensors={sensors} />

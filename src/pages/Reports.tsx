@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   Search, X, MapPin, Phone, Clock, ChevronDown,
   Eye, Plus, Trash2, AlertTriangle, Users, Calendar,
-  ExternalLink, Filter, FileText, Camera,
+  Filter, FileText, Camera,
 } from 'lucide-react';
 import type { FieldReport, Zone, Urgency } from '../lib/types';
 import { formatDateTime, formatRelativeTime } from '../lib/utils';
@@ -10,15 +10,18 @@ import { api } from '../lib/api';
 import { usePagination } from '../lib/usePagination';
 import Pagination from '../components/Pagination';
 
-interface Props { zones: Zone[] }
+interface Props {
+  zones: Zone[];
+  onOpenInMap?: (lat: string, lng: string, label: string) => void;
+  onUnresolvedCount?: (n: number) => void;
+}
 
 /* ── helpers ── */
-const BACKEND = (import.meta.env.VITE_API_URL as string || 'http://localhost:8000/api').replace(/\/api$/, '');
+const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000/api';
 
-function photoUrl(photo: string | null): string {
-  if (!photo) return '';
-  if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
-  return `${BACKEND}/storage/${photo}`;
+function photoUrl(reportId: number, hasPhoto: boolean): string {
+  if (!hasPhoto) return '';
+  return `${API_BASE}/reports/${reportId}/photo`;
 }
 
 function readableDate(dateStr: string): { day: string; rest: string } {
@@ -65,11 +68,12 @@ const emptyForm = {
   urgency_id:       '',
 };
 
-export default function Reports({ zones }: Props) {
+export default function Reports({ zones, onOpenInMap, onUnresolvedCount }: Props) {
   const [reports, setReports]       = useState<FieldReport[]>([]);
   const [urgencies, setUrgencies]   = useState<Urgency[]>([]);
   const [loading, setLoading]       = useState(true);
   const [selected, setSelected]     = useState<FieldReport | null>(null);
+  const [resolving, setResolving]   = useState(false);
   const [search, setSearch]         = useState('');
   const [zoneFilter, setZoneFilter] = useState('');
   const [urgFilter, setUrgFilter]   = useState('');
@@ -98,17 +102,34 @@ export default function Reports({ zones }: Props) {
     setLoading(true);
     try {
       const [rData, uData] = await Promise.all([api.reports.list(), api.urgencies.list()]);
-      if (Array.isArray(rData)) setReports(rData);
+      if (Array.isArray(rData)) {
+        setReports(rData);
+        onUnresolvedCount?.(rData.filter((r: FieldReport) => r.status === 'unresolved').length);
+      }
       if (Array.isArray(uData)) setUrgencies(uData);
     } catch { /* empty state */ } finally { setLoading(false); }
-  }, []);
+  }, [onUnresolvedCount]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  async function resolveReport(r: FieldReport) {
+    const next = r.status === 'unresolved' ? 'resolved' : 'unresolved';
+    setResolving(true);
+    try {
+      await api.reports.update(r.report_id, { status: next });
+      setReports(prev => {
+        const updated = prev.map(p => p.report_id === r.report_id ? { ...p, status: next } : p);
+        onUnresolvedCount?.(updated.filter(p => p.status === 'unresolved').length);
+        return updated;
+      });
+      setSelected(s => s ? { ...s, status: next } : s);
+    } finally { setResolving(false); }
+  }
 
   /* analytics */
   const todayStr      = new Date().toISOString().slice(0, 10);
   const totalToday    = reports.filter(r => (r.date ?? '').slice(0, 10) === todayStr).length;
-  const withPhoto     = reports.filter(r => !!r.photo).length;
+  const withPhoto     = reports.filter(r => r.has_photo).length;
   const totalPeople   = reports.reduce((s, r) => s + (r.number_of_people || 0), 0);
 
   const filtered = reports.filter(r => {
@@ -140,32 +161,23 @@ export default function Reports({ zones }: Props) {
     if (!form.color)   { setFormError('Threat color/marker is required.'); return; }
     if (!form.number_of_people) { setFormError('Number of people is required.'); return; }
     setFormError(null);
-
-    let photoFilename: string | null = form.photo.trim() || null;
-
-    // Upload photo file first if user picked one
-    if (photoFile) {
-      setUploading(true);
-      try {
-        const result = await api.uploadPhoto(photoFile);
-        photoFilename = result.filename;
-      } catch {
-        setFormError('Photo upload failed. Check the backend is running.');
-        setUploading(false);
-        return;
-      }
-      setUploading(false);
-    }
-
     setSaving(true);
     try {
-      await api.reports.create({
-        date: form.date, latitude: parseFloat(form.latitude), longitude: parseFloat(form.longitude),
-        address: form.address.trim(), zone_id: form.zone_id, color: form.color.trim(),
-        number_of_people: parseInt(form.number_of_people), description: form.description.trim() || null,
-        photo: photoFilename, name: form.name.trim(), phone: form.phone.trim(),
-        urgency_id: parseInt(form.urgency_id),
-      });
+      const formData = new FormData();
+      formData.append('date', form.date);
+      formData.append('latitude', form.latitude);
+      formData.append('longitude', form.longitude);
+      formData.append('address', form.address.trim());
+      formData.append('zone_id', form.zone_id);
+      formData.append('color', form.color.trim());
+      formData.append('number_of_people', form.number_of_people);
+      formData.append('name', form.name.trim());
+      formData.append('phone', form.phone.trim());
+      formData.append('urgency_id', form.urgency_id);
+      if (form.description.trim()) formData.append('description', form.description.trim());
+      if (photoFile) formData.append('photo', photoFile);
+
+      await api.reports.createMultipart(formData);
       setShowCreate(false); setForm(emptyForm); setPhotoFile(null); setPhotoPreview(null); fetchAll();
     } catch { setFormError('Failed to save. Make sure the backend is running.'); }
     finally { setSaving(false); }
@@ -236,13 +248,14 @@ export default function Reports({ zones }: Props) {
                       <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Zone</th>
                       <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">People</th>
                       <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Photo</th>
+                      <th className="text-left px-4 py-3.5 text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Status</th>
                       <th className="px-4 py-3.5 w-10" />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {pageItems.map((r, i) => {
                       const { day, rest } = readableDate(r.date);
-                      const pUrl = photoUrl(r.photo);
+                      const pUrl = photoUrl(r.report_id, r.has_photo ?? false);
                       return (
                         <tr key={r.report_id} onClick={() => { setSelected(r); setImgError(false); }}
                           className={`group cursor-pointer transition-colors ${
@@ -304,6 +317,18 @@ export default function Reports({ zones }: Props) {
                             )}
                           </td>
 
+                          {/* Status */}
+                          <td className="px-4 py-3.5">
+                            <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold ${
+                              r.status === 'resolved'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-700'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${r.status === 'resolved' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                              {r.status === 'resolved' ? 'Resolved' : 'Unresolved'}
+                            </span>
+                          </td>
+
                           {/* Eye */}
                           <td className="px-3 py-3.5 text-right pr-4">
                             <span className="inline-flex w-7 h-7 items-center justify-center rounded-full text-slate-300 group-hover:text-blue-500 group-hover:bg-blue-50 transition-colors">
@@ -315,7 +340,7 @@ export default function Reports({ zones }: Props) {
                     })}
                     {filtered.length === 0 && !loading && (
                       <tr>
-                        <td colSpan={7} className="py-16 text-center text-slate-400 text-sm">
+                        <td colSpan={8} className="py-16 text-center text-slate-400 text-sm">
                           {reports.length === 0 ? 'No field reports in the database yet.' : 'No reports match your filters.'}
                         </td>
                       </tr>
@@ -331,13 +356,21 @@ export default function Reports({ zones }: Props) {
         {/* ── Detail panel ── */}
         {selected && (() => {
           const { day, rest } = readableDate(selected.date);
-          const pUrl = photoUrl(selected.photo);
+          const pUrl = photoUrl(selected.report_id, selected.has_photo ?? false);
           const urg  = urgLabel(selected);
           return (
             <div className="flex-1 border-l border-slate-200 bg-white overflow-auto">
               <div className="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10">
                 <h2 className="text-sm font-semibold text-slate-800">Report Detail</h2>
                 <div className="flex items-center gap-2">
+                  <button onClick={() => resolveReport(selected)} disabled={resolving}
+                    className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors border disabled:opacity-50 ${
+                      selected.status === 'resolved'
+                        ? 'text-amber-600 hover:text-amber-800 hover:bg-amber-50 border-amber-200'
+                        : 'text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border-emerald-200'
+                    }`}>
+                    {resolving ? '…' : selected.status === 'resolved' ? '↩ Reopen' : '✓ Resolve'}
+                  </button>
                   <button onClick={() => deleteReport(selected.report_id)} disabled={deleting}
                     className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors border border-red-200 disabled:opacity-50">
                     <Trash2 size={13} />{deleting ? 'Deleting…' : 'Delete'}
@@ -351,7 +384,7 @@ export default function Reports({ zones }: Props) {
               <div className="p-5 space-y-4">
 
                 {/* ── Photo ── */}
-                {pUrl && !imgError && (
+                {selected.has_photo && !imgError && (
                   <div className="rounded-xl overflow-hidden bg-slate-100 aspect-video relative group">
                     <img src={pUrl} alt="Incident photo" className="w-full h-full object-cover"
                       onError={() => setImgError(true)} />
@@ -363,20 +396,48 @@ export default function Reports({ zones }: Props) {
                     </a>
                   </div>
                 )}
-                {pUrl && imgError && (
-                  <div className="rounded-xl bg-slate-100 border border-slate-200 px-5 py-6 text-center">
+                {selected.has_photo && imgError && (
+                  <div className="rounded-xl bg-slate-100 border border-dashed border-slate-300 px-5 py-5 text-center">
                     <Camera size={28} className="text-slate-300 mx-auto mb-2" />
-                    <p className="text-xs font-semibold text-slate-500 mb-1">Photo stored on server</p>
-                    <p className="text-[11px] text-slate-400 font-mono break-all">{selected.photo}</p>
-                    <p className="text-[11px] text-slate-400 mt-2">
-                      File not found at <span className="font-mono">{pUrl}</span>
-                    </p>
+                    <p className="text-xs font-semibold text-slate-500 mb-1">Photo could not be loaded</p>
+                    <label className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${uploading ? 'bg-slate-200 text-slate-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
+                      <Camera size={12} />
+                      {uploading ? 'Uploading…' : 'Replace photo'}
+                      <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                        onChange={async e => {
+                          const f = e.target.files?.[0]; if (!f) return;
+                          setUploading(true);
+                          try {
+                            await api.reports.uploadPhoto(selected.report_id, f);
+                            setReports(prev => prev.map(p => p.report_id === selected.report_id ? { ...p, has_photo: true } : p));
+                            setSelected(s => s ? { ...s, has_photo: true } : s);
+                            setImgError(false);
+                          } catch { /* keep error state */ } finally { setUploading(false); }
+                        }}
+                      />
+                    </label>
                   </div>
                 )}
-                {selected.photo && !pUrl && (
-                  <div className="rounded-xl bg-slate-100 border border-slate-200 px-5 py-4 flex items-center gap-2">
-                    <Camera size={16} className="text-slate-400 shrink-0" />
-                    <span className="text-xs text-slate-500 font-mono break-all">{selected.photo}</span>
+                {!selected.has_photo && (
+                  <div className="rounded-xl bg-slate-50 border border-dashed border-slate-200 px-5 py-5 text-center">
+                    <Camera size={24} className="text-slate-300 mx-auto mb-2" />
+                    <p className="text-xs text-slate-400 mb-3">No photo attached to this report</p>
+                    <label className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${uploading ? 'bg-slate-200 text-slate-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
+                      <Camera size={12} />
+                      {uploading ? 'Uploading…' : 'Add photo'}
+                      <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                        onChange={async e => {
+                          const f = e.target.files?.[0]; if (!f) return;
+                          setUploading(true);
+                          try {
+                            await api.reports.uploadPhoto(selected.report_id, f);
+                            setReports(prev => prev.map(p => p.report_id === selected.report_id ? { ...p, has_photo: true } : p));
+                            setSelected(s => s ? { ...s, has_photo: true } : s);
+                            setImgError(false);
+                          } catch { /* keep error state */ } finally { setUploading(false); }
+                        }}
+                      />
+                    </label>
                   </div>
                 )}
 
@@ -397,12 +458,14 @@ export default function Reports({ zones }: Props) {
                 <div className="bg-slate-50 rounded-xl p-4">
                   <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Location</p>
                   <p className="text-sm font-semibold text-slate-800 leading-snug mb-2">{selected.address}</p>
-                  <a href={`https://www.google.com/maps?q=${selected.latitude},${selected.longitude}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline font-mono">
-                    <ExternalLink size={11} />
+                  <button
+                    onClick={() => onOpenInMap?.(String(selected.latitude), String(selected.longitude), selected.address)}
+                    className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 hover:underline font-mono transition-colors"
+                    title="Open in Live Map"
+                  >
+                    <MapPin size={11} />
                     {selected.latitude}, {selected.longitude}
-                  </a>
+                  </button>
                 </div>
 
                 {/* Description */}
@@ -513,9 +576,9 @@ export default function Reports({ zones }: Props) {
             <div className="flex gap-3 px-6 pb-6">
               <button onClick={() => { setShowCreate(false); setForm(emptyForm); setFormError(null); clearPhoto(); }}
                 className="flex-1 py-2.5 text-sm border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
-              <button onClick={createReport} disabled={saving || uploading}
+              <button onClick={createReport} disabled={saving}
                 className="flex-1 py-2.5 text-sm bg-slate-900 text-white rounded-xl hover:bg-slate-700 transition-colors disabled:opacity-50">
-                {uploading ? 'Uploading photo…' : saving ? 'Saving…' : 'Save Report'}
+                {saving ? 'Saving…' : 'Save Report'}
               </button>
             </div>
           </div>
